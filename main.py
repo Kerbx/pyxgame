@@ -41,19 +41,65 @@ ANSWER_SYMBOL = '&'
 # CLASSES #
 ###########
 
+class Person():
+    """Parent class for all persons in game.
+    """
+    name = ''
+    x = 0
+    y = 0
+    image = 0
+    u = 0
+    v = 0
+    width = 16
+    height = 16
+
+
+class MainCharacter(Person):
+    """Class for main character.
+    """
+    def __init__(self, name) -> None:
+        self.name = name
+        self.u = 0
+        self.v = 16
+        self.hero = pyxel.Image(self.width, self.height)
+        self.hero = pyxel.blt(self.x, self.y, self.image, self.u, self. v, self.width, self.height, COLOR_KEY)
+
+    def walking(self):
+        if pyxel.btn(pyxel.KEY_W):
+            self.y -= 1
+        elif pyxel.btn(pyxel.KEY_S):
+            self.y += 1
+        elif pyxel.btn(pyxel.KEY_D):
+            self.x += 1
+        elif pyxel.btn(pyxel.KEY_A):
+            self.x -= 1
+    
+    def draw(self):
+        self.hero = pyxel.blt(self.x, self.y, self.image, self.u, self.v, self.width, self.height, COLOR_KEY)
+        
+    def toSpeak(self) -> None:
+        self.dialog = DialogSystem('dialogSystem/magician.txt')
+        self.dialog.show()
+        self.dialog.narrative()
+ 
+        
 class DialogSystem():
     """This class simulating dialog system.
     """
     def __init__(self, file) -> None:
         self.dialog_file = file
-        pyxel.bltm(DIALOG_POS_X, DIALOG_POS_Y, DIALOG_TILEMAP, DIALOG_U, DIALOG_V, DIALOG_WIDTH, DIALOG_HEIGHT, DIALOG_COLOR_KEY)
     
+    def show(self) -> None:
+        pyxel.bltm(DIALOG_POS_X, DIALOG_POS_Y, DIALOG_TILEMAP, DIALOG_U, DIALOG_V, DIALOG_WIDTH, DIALOG_HEIGHT, DIALOG_COLOR_KEY)
+            
     def narrative(self) -> None:
+        dialog_answers = ''
         with open(self.dialog_file) as dialog_file:
             dialog_answers = list(filter(lambda string: string.startswith(ANSWER_SYMBOL), list(dialog_file)))
+        
+        with open(self.dialog_file) as dialog_file:
             for row in dialog_file:
-                print(row)
-                if pyxel.btn(pyxel.KEY_E):
+                if pyxel.btn(pyxel.KEY_B):
                     if row.startswith(NARRATIVE_SYMBOL):
                         pyxel.text(6, 240, row[1:], DIALOG_COLOR)
                     elif row.startswith(QUESTION_SYMBOL):
@@ -75,15 +121,10 @@ class OnLoadResourses():
         pyxel.load(RESOURCES_FILENAME)
         
         
-class Mag():
+class Mag(Person):
     def __init__(self, x, y, color):
         self.x = x
         self.y = y
-        self.u = 0
-        self.v = 0
-        self.image = 0
-        self.height = 16
-        self.width = 16
         self.name = 'Magician'
         self.persona = pyxel.Image(self.width, self.height)
         
@@ -112,15 +153,17 @@ class App():
         pyxel.init(width=SIZE_W, height=SIZE_H, title=TITLE, fps=FPS)
         OnLoadResourses()
         self.x = 0
-        self.mag1 = Mag(0, 0, 'yellow')
-        self.dia = DialogSystem('dialogSystem/magician.txt')
+        self.hero = MainCharacter('Lukich')
         pyxel.run(self.update, self.draw)
+        
     def update(self):
-        self.dia.narrative()
+        self.hero.walking()
     def draw(self):
         pyxel.cls(0)
-        self.mag1.draw(self.x, 0)
+        self.hero.draw()
+        if pyxel.btn(pyxel.KEY_E):
+            self.hero.toSpeak()
+            
     
-
 App()
         
