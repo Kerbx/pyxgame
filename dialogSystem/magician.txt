@@ -1,0 +1,5 @@
+#Hello, Hero.
+?You are here to help us?
+&Yes|No
+1Okey, i really happy to hear that.
+2It's... Not funny...
